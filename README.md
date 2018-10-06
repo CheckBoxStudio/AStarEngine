@@ -8,7 +8,7 @@
                                          \__/
 ```
 AStarEngine is an implementation of [A-Start](http://theory.stanford.edu/~amitp/GameProgramming/) algorithm in C++.
-This project is built with reference to Ref.[2], thus is similar to Ref.[2] in the main structure.
+This project is built with reference to Ref.[1], thus is similar to Ref.[1] in the main structure.
 
 ## Usage
 
