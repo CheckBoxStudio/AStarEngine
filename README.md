@@ -24,9 +24,9 @@ See the test code for more details.
 
 ## References
 
-[1] https://github.com/justinhj/astar-algorithm-cpp
-[2] https://github.com/vandersonmr/A_Star_Algorithm
-[3] http://code.google.com/p/recastnavigation/ [^1]
+[1] https://github.com/justinhj/astar-algorithm-cpp  
+[2] https://github.com/vandersonmr/A_Star_Algorithm  
+[3] http://code.google.com/p/recastnavigation/ [^1]  
 
 [^1] For the convenience of users who cannot access Google, I've forked Ref.[3] from Google.
      Check it at my [repository](https://github.com/weiquanmao/policy-based-search).
