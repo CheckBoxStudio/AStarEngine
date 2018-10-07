@@ -53,7 +53,7 @@ namespace AStarEng
         virtual IDKey Key() const { return m_key; }
         virtual IDKey ID() const {return m_key; }
 
-        virtual void print() {
+        virtual void Print() {
             printf("%d",m_key);
         }
 
@@ -81,8 +81,15 @@ namespace AStarEng
         // Judge that if _nodeA_ is the _goalNode_
         virtual bool IsGoalNode(const NodeType& node, const NodeType& goalNode) = 0;
         // Calculate the entire cost of one route(solution) _nodes_
-        virtual double CalRouteCost(const vector<NodeType> &nodes) {
-            return 0.0;
+        virtual double CalRouteCost(const vector<NodeType> &nodes)
+        {
+            double costVal = 0.0;
+            if (nodes.size() > 1) {
+                for (int i = 1; i < nodes.size(); ++i) {
+                    costVal += CalG(nodes.at(i - 1), nodes.at(i));
+                }
+            }
+            return costVal;
         };
     };
 

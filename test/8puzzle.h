@@ -27,13 +27,13 @@ typedef enum {
 class PuzzleNode : public AANode
 {
 public:
-    PuzzleNode(const TILE *tile = 0) 
+    PuzzleNode(const TILE *tile = 0)
     {
         SetTile(tile);
     }
     ~PuzzleNode() {}
 
-    void print() {
+    void Print() {
         printf("%c %c %c\n%c %c %c\n%c %c %c\n",
             m_tile[0] + '0', m_tile[1] + '0', m_tile[2] + '0',
             m_tile[3] + '0', m_tile[4] + '0', m_tile[5] + '0',
@@ -56,7 +56,7 @@ public:
             genKey();
         }
     }
-    void GetSpacePosition (int &rx, int &ry) const 
+    void GetSpacePosition (int &rx, int &ry) const
     {
         for (int i=0; i<BOARD_WIDTH*BOARD_HEIGHT; ++i)
         {
@@ -138,9 +138,9 @@ public:
         int clockwise_tile_of[BOARD_WIDTH * BOARD_HEIGHT] =
         {
             1,
-            2,  	  // 012	  
-            5,  	  // 345	  
-            0,  	  // 678	  
+            2,  	  // 012
+            5,  	  // 345
+            0,  	  // 678
             -1,  // never called with center square
             8,
             3,
@@ -176,7 +176,7 @@ public:
 
         s = 0;
 
-        // score 1 point if centre is not correct 
+        // score 1 point if centre is not correct
         if (p1[(BOARD_HEIGHT*BOARD_WIDTH) / 2] != p2[(BOARD_HEIGHT*BOARD_WIDTH) / 2])
         {
             s = 1;
@@ -330,20 +330,20 @@ inline void doPuzzleTest()
 {
     printf("  Test 8-puzzle problem \n");
     printf("==============================\n");
-   
+
     PuzzleNode nodeStart(g_startTile);
     PuzzleNode nodeGoal(g_goalTile);
     AAEngine<PuzzleNode, PuzzleGrid> astarsearch(512);
     astarsearch.SetStartAndGoalNodes(nodeStart, nodeGoal);
     astarsearch.Search();
- 
+
     if (astarsearch.GetState() == AAEngine<PuzzleNode, PuzzleGrid>::ASE_STATE_SUCCEEDED)
     {
         printf("Search found goal state\n");
 
         int steps = 0;
 
-        printf("Displaying solution\n");  
+        printf("Displaying solution\n");
         steps = 0;
         PuzzleNode *node = astarsearch.GetSolutionStart();
         while (node) {
@@ -371,11 +371,11 @@ inline void doPuzzleTest()
     }
     else if (astarsearch.GetState() == AAEngine<PuzzleNode, PuzzleGrid>::ASE_STATE_FAILED)
     {
-        printf("Search terminated. Did not find goal state\n");	
+        printf("Search terminated. Did not find goal state\n");
     }
     else if (astarsearch.GetState() == AAEngine<PuzzleNode, PuzzleGrid>::ASE_STATE_OUT_OF_MEMORY)
     {
-        printf("Search terminated. Out of memory\n");	
+        printf("Search terminated. Out of memory\n");
     }
 
     printf("SearchSteps : %d \n", astarsearch.GetStepCount());
