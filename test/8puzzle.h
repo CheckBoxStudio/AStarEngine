@@ -230,6 +230,11 @@ public:
     {
         return 1.0;
     }
+    // Judge that if _nodeA_ is the _goalNode_
+    bool IsGoalNode(const PuzzleNode& node, const PuzzleNode& goalNode)
+    {
+        return IsSameNode(node, goalNode);
+    }
     // Get the neighbor nodes of _srcNode_
     unsigned int GetNeighbors(const PuzzleNode &node, const PuzzleNode * const pParent, vector<PuzzleNode> &neighborNodes)
     {
@@ -257,26 +262,6 @@ public:
         }
         std::swap(neighbors, neighborNodes);
         return neighborNodes.size();
-    }
-    // Judge that if _nodeA_ and _nodeB_ is the same node
-    bool IsSameNode(const PuzzleNode& nodeA, const PuzzleNode& nodeB)
-    {
-        const TILE *p1 = nodeA.Tile();
-        const TILE *p2 = nodeB.Tile();
-        for (int i = 0; i<(BOARD_HEIGHT*BOARD_WIDTH); ++i)
-        {
-            if (p1[i] != p2[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-    // Judge that if _nodeA_ is the _goalNode_
-    bool IsGoalNode(const PuzzleNode& node, const PuzzleNode& goalNode)
-    {
-        return IsSameNode(node, goalNode);
     }
 };
 

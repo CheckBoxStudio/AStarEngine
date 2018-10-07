@@ -185,6 +185,11 @@ public:
     {
         return RomaniaMap[srcNode.City()][dstNode.City()];
     }
+    // Judge that if _nodeA_ is the _goalNode_
+    bool IsGoalNode(const CityNode& node, const CityNode& goalNode)
+    {
+        return node.City() == Bucharest;
+    }
     // Get the neighbor nodes of _srcNode_
     unsigned int GetNeighbors(const CityNode &node, const CityNode * const pParent, vector<CityNode> &neighborNodes)
     {
@@ -200,17 +205,6 @@ public:
         std::swap(neighbors, neighborNodes);
         return neighborNodes.size();
     }
-    // Judge that if _nodeA_ and _nodeB_ is the same node
-    bool IsSameNode(const CityNode& nodeA, const CityNode& nodeB)
-    {
-        return nodeA.City() == nodeB.City();
-    }
-    // Judge that if _nodeA_ is the _goalNode_
-    bool IsGoalNode(const CityNode& node, const CityNode& goalNode)
-    {
-        return node.City() == Bucharest;
-    }
-
 };
 
 inline void doRomaniaTest()

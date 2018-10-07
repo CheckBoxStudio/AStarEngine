@@ -93,12 +93,15 @@ namespace AStarEng
         virtual double CalH(const NodeType &srcNode, const NodeType &goalNode) = 0;
         // Calculate the distance(cost) of travelling from _srcNode_ to _dstNode_
         virtual double CalG(const NodeType &srcNode, const NodeType &dstNode) = 0;
-        // Get the neighbor nodes of _srcNode_
-        virtual unsigned int GetNeighbors(const NodeType &node, const NodeType * const pParent, vector<NodeType> &neighborNodes) = 0;
-        // Judge that if _nodeA_ and _nodeB_ is the same node
-        virtual bool IsSameNode(const NodeType& nodeA, const NodeType& nodeB) = 0;
         // Judge that if _nodeA_ is the _goalNode_
         virtual bool IsGoalNode(const NodeType& node, const NodeType& goalNode) = 0;
+        // Get the neighbor nodes of _srcNode_
+        virtual unsigned int GetNeighbors(const NodeType &node, const NodeType * const pParent, vector<NodeType> &neighborNodes) = 0;               
+        // Judge that if _nodeA_ and _nodeB_ is the same node
+        virtual bool IsSameNode(const NodeType& nodeA, const NodeType& nodeB)
+        {
+            return nodeA.Key() == nodeB.Key();
+        }
         // Calculate the entire cost of one route(solution) _nodes_
         virtual double CalRouteCost(const vector<NodeType> &nodes)
         {

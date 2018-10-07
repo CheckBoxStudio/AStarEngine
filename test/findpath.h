@@ -91,6 +91,11 @@ public:
     {
         return GetMap(dstNode);
     }
+    // Judge that if _nodeA_ is the _goalNode_
+    bool IsGoalNode(const PathNode& node, const PathNode& goalNode)
+    {
+        return IsSameNode(node, goalNode);
+    }
     // Get the neighbor nodes of _srcNode_
     unsigned int GetNeighbors(const PathNode &node, const PathNode * const pParent, vector<PathNode> &neighborNodes)
     {
@@ -130,21 +135,7 @@ public:
         std::swap(neighbors, neighborNodes);
         return neighborNodes.size();
     }
-    // Judge that if _nodeA_ and _nodeB_ is the same node
-    bool IsSameNode(const PathNode& nodeA, const PathNode& nodeB)
-    {
-        bool bSame = false;
-        if (nodeA.X() == nodeB.X() &&
-            nodeA.Y() == nodeB.Y()) {
-            bSame = true;
-        }
-        return bSame;
-    }
-    // Judge that if _nodeA_ is the _goalNode_
-    bool IsGoalNode(const PathNode& node, const PathNode& goalNode)
-    {
-        return IsSameNode(node, goalNode);
-    }
+    
 
     int GetMap(const PathNode& node) const
     { 
