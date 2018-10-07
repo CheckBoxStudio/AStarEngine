@@ -131,18 +131,17 @@ namespace AStarEng
      * Ref: http://theory.stanford.edu/~amitp/GameProgramming/ImplementationNotes.html
      * =========================================================================
      ***************************************************************************/
+    enum ASE_STATE {
+        ASE_STATE_INVALID,
+        ASE_STATE_INITIALISED,
+        ASE_STATE_SEARCHING,
+        ASE_STATE_SUCCEEDED,
+        ASE_STATE_CANCELED,
+        ASE_STATE_FAILED,
+        ASE_STATE_OUT_OF_MEMORY
+    };
     template <typename NodeType, typename GridType> class AAEngine
     {
-    public:
-        enum ASE_STATE {
-            ASE_STATE_INVALID,
-            ASE_STATE_INITIALISED,
-            ASE_STATE_SEARCHING,
-            ASE_STATE_SUCCEEDED,
-            ASE_STATE_CANCELED,
-            ASE_STATE_FAILED,
-            ASE_STATE_OUT_OF_MEMORY
-        };
     protected:
         class ASENode : public NodeType
         {

@@ -337,7 +337,7 @@ inline void doPuzzleTest()
     astarsearch.SetStartAndGoalNodes(nodeStart, nodeGoal);
     astarsearch.Search();
 
-    if (astarsearch.GetState() == AAEngine<PuzzleNode, PuzzleGrid>::ASE_STATE_SUCCEEDED)
+    if (astarsearch.GetState() == ASE_STATE_SUCCEEDED)
     {
         printf("Search found goal state\n");
 
@@ -347,7 +347,7 @@ inline void doPuzzleTest()
         steps = 0;
         PuzzleNode *node = astarsearch.GetSolutionStart();
         while (node) {
-            node->print();
+            node->Print();
             node = astarsearch.GetSolutionNext();
             printf("\n");
             steps++;
@@ -360,7 +360,7 @@ inline void doPuzzleTest()
         steps = 0;
         node = astarsearch.GetSolutionEnd();
         while (node) {
-            node->print();
+            node->Print();
             node = astarsearch.GetSolutionPrev();
             printf("\n");
             steps++;
@@ -369,11 +369,11 @@ inline void doPuzzleTest()
 
         node = astarsearch.GetSolutionEnd();
     }
-    else if (astarsearch.GetState() == AAEngine<PuzzleNode, PuzzleGrid>::ASE_STATE_FAILED)
+    else if (astarsearch.GetState() == ASE_STATE_FAILED)
     {
         printf("Search terminated. Did not find goal state\n");
     }
-    else if (astarsearch.GetState() == AAEngine<PuzzleNode, PuzzleGrid>::ASE_STATE_OUT_OF_MEMORY)
+    else if (astarsearch.GetState() == ASE_STATE_OUT_OF_MEMORY)
     {
         printf("Search terminated. Out of memory\n");
     }
