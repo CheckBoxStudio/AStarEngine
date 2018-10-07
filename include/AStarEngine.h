@@ -75,7 +75,7 @@ namespace AStarEng
         // Calculate the distance(cost) of travelling from _srcNode_ to _dstNode_
         virtual double CalG(const NodeType &srcNode, const NodeType &dstNode) = 0;
         // Get the neighbor nodes of _srcNode_
-        virtual unsigned int GetNeighbors(const NodeType &node, vector<NodeType> &neighborNodes) = 0;
+        virtual unsigned int GetNeighbors(const NodeType &node, const NodeType * const pParent, vector<NodeType> &neighborNodes) = 0;
         // Judge that if _nodeA_ and _nodeB_ is the same node
         virtual bool IsSameNode(const NodeType& nodeA, const NodeType& nodeB) = 0;
         // Judge that if _nodeA_ is the _goalNode_
@@ -383,7 +383,7 @@ namespace AStarEng
             else
             {
                 vector<NodeType> neighborNodes;
-                m_Grid.GetNeighbors(*node, neighborNodes);
+                m_Grid.GetNeighbors(*node, node->pParent, neighborNodes);
                 for(vector<NodeType>::iterator iter = neighborNodes.begin();
                     iter != neighborNodes.end();
                     ++iter)

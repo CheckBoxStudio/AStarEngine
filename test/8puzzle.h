@@ -231,7 +231,7 @@ public:
         return 1.0;
     }
     // Get the neighbor nodes of _srcNode_
-    unsigned int GetNeighbors(const PuzzleNode &node, vector<PuzzleNode> &neighborNodes)
+    unsigned int GetNeighbors(const PuzzleNode &node, const PuzzleNode * const pParent, vector<PuzzleNode> &neighborNodes)
     {
         vector<PuzzleNode> neighbors;
         PuzzleNode tempNode;
@@ -339,11 +339,11 @@ inline void doPuzzleTest()
 
     if (astarsearch.GetState() == ASE_STATE_SUCCEEDED)
     {
-        printf("Search found goal state\n");
+        printf("[:)] Search found goal state.\n\n");
 
         int steps = 0;
 
-        printf("Displaying solution\n");
+        printf("Displaying solution >> \n\n");
         steps = 0;
         PuzzleNode *node = astarsearch.GetSolutionStart();
         while (node) {
@@ -354,9 +354,9 @@ inline void doPuzzleTest()
         }
         printf("Solution steps %d\n", steps);
 
-        printf("-----\n");
+        printf("\n-----\n\n");
 
-        printf("Displaying reverse solution\n");
+        printf("Displaying reverse solution >> \n\n");
         steps = 0;
         node = astarsearch.GetSolutionEnd();
         while (node) {
@@ -371,14 +371,14 @@ inline void doPuzzleTest()
     }
     else if (astarsearch.GetState() == ASE_STATE_FAILED)
     {
-        printf("Search terminated. Did not find goal state\n");
+        printf("[:(] Search terminated. Did not find goal state.\n\n");
     }
     else if (astarsearch.GetState() == ASE_STATE_OUT_OF_MEMORY)
     {
-        printf("Search terminated. Out of memory\n");
+        printf("[:(] Search terminated. Out of memory. \n\n");
     }
-
-    printf("SearchSteps : %d \n", astarsearch.GetStepCount());
+    printf("\n-----\n\n");
+    printf("Total search steps : %d \n", astarsearch.GetStepCount());
 
 }
 

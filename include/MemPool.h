@@ -154,11 +154,14 @@ public:
     // for debugging this displays both lists (using the prev/next list pointers)
     void Debug()
     {
-        printf( "vacant list \n" );
+        printf( "[--vacant list--] >> \n" );
         int n = 0;
         MemPoolElement *p = m_pMemVacant;
+        if (!p) {
+            printf(" (null) \n");
+        }
         while(p) {
-            printf( "%08x<-[%08x]->%08x  ", p->pPrev, p, p->pNext );
+            printf( "%08x:%08x:%08x  ", p->pPrev, p, p->pNext );
             p = p->pNext;
             n++;
             if (n == 4) {
@@ -166,18 +169,28 @@ public:
                 n = 0;
             }
         }
+        if (n != 0) {
+            printf("\n");
+        }
         printf("\n");
 
-        printf( "using list \n" );
+        printf( "[--using list--] >> \n" );
         p = m_pMemUsing;
         n = 0;
+        if (!p) {
+            printf(" (null) \n");
+        }
         while(p) {
-            printf( "%08x<-[%08x]->%08x ", p->pPrev, p, p->pNext );
+            printf( "%08x:%08x:%08x ", p->pPrev, p, p->pNext );
             p = p->pNext;
+            n++;
             if (n == 4) {
                 printf("\n");
                 n = 0;
-            }
+            }   
+        }
+        if (n != 0) {
+            printf("\n");
         }
         printf("\n");
     }
