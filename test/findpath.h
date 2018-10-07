@@ -96,10 +96,10 @@ public:
     {
         return IsSameNode(node, goalNode);
     }
-    // Get the neighbor nodes of _srcNode_
-    unsigned int GetNeighbors(const PathNode &node, const PathNode * const pParent, vector<PathNode> &neighborNodes)
+    // Get the successor nodes of _srcNode_
+    unsigned int GetSuccessors(const PathNode &node, const PathNode * const pParent, vector<PathNode> &successorNodes)
     {
-        vector<PathNode> neighbors;
+        vector<PathNode> successors;
 
         int px = -1;
         int py = -1;
@@ -114,26 +114,26 @@ public:
 
         if (GetMap(x - 1, y) < 9 &&
             (px != x - 1 || py != y) ) {
-            neighbors.push_back(PathNode(x - 1, y));
+            successors.push_back(PathNode(x - 1, y));
         }
 
         if (GetMap(x, y - 1) < 9 &&
             (px != x || py != y - 1) ) {
-            neighbors.push_back(PathNode(x, y - 1));
+            successors.push_back(PathNode(x, y - 1));
         }
 
         if (GetMap(x + 1, y) < 9 &&
             (px != x + 1 || py != y) ) {
-            neighbors.push_back(PathNode(x + 1, y));
+            successors.push_back(PathNode(x + 1, y));
         }      
 
         if (GetMap(x, y + 1) < 9 &&
             (px != x || py != y + 1) ) {
-            neighbors.push_back(PathNode(x, y + 1));
+            successors.push_back(PathNode(x, y + 1));
         }
 
-        std::swap(neighbors, neighborNodes);
-        return neighborNodes.size();
+        std::swap(successors, successorNodes);
+        return successorNodes.size();
     }
     
 

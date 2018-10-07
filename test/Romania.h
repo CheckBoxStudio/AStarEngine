@@ -190,20 +190,20 @@ public:
     {
         return node.City() == Bucharest;
     }
-    // Get the neighbor nodes of _srcNode_
-    unsigned int GetNeighbors(const CityNode &node, const CityNode * const pParent, vector<CityNode> &neighborNodes)
+    // Get the successor nodes of _srcNode_
+    unsigned int GetSuccessors(const CityNode &node, const CityNode * const pParent, vector<CityNode> &successorNodes)
     {
-        vector<CityNode> neighbors;
+        vector<CityNode> successors;
         
         ENUM_CITIES city = node.City();
         for (int c = 0; c<MAX_CITIES; c++)
         {
             if (RomaniaMap[city][c] < 0) continue;
-            neighbors.push_back(CityNode((ENUM_CITIES)c));
+            successors.push_back(CityNode((ENUM_CITIES)c));
         }
 
-        std::swap(neighbors, neighborNodes);
-        return neighborNodes.size();
+        std::swap(successors, successorNodes);
+        return successorNodes.size();
     }
 };
 

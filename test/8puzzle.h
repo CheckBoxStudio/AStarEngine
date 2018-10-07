@@ -235,10 +235,10 @@ public:
     {
         return IsSameNode(node, goalNode);
     }
-    // Get the neighbor nodes of _srcNode_
-    unsigned int GetNeighbors(const PuzzleNode &node, const PuzzleNode * const pParent, vector<PuzzleNode> &neighborNodes)
+    // Get the successor nodes of _srcNode_
+    unsigned int GetSuccessors(const PuzzleNode &node, const PuzzleNode * const pParent, vector<PuzzleNode> &successorNodes)
     {
-        vector<PuzzleNode> neighbors;
+        vector<PuzzleNode> successors;
         PuzzleNode tempNode;
 
         int sp_x, sp_y;
@@ -246,22 +246,22 @@ public:
 
         tempNode = node;
         if (tempNode.LegalMove(sp_x, sp_y, sp_x, sp_y - 1) == true) {
-            neighbors.push_back(tempNode);
+            successors.push_back(tempNode);
         }
         tempNode = node;
         if (tempNode.LegalMove(sp_x, sp_y, sp_x, sp_y + 1) == true) {
-            neighbors.push_back(tempNode);
+            successors.push_back(tempNode);
         }
         tempNode = node;
         if (tempNode.LegalMove(sp_x, sp_y, sp_x - 1, sp_y) == true) {
-            neighbors.push_back(tempNode);
+            successors.push_back(tempNode);
         }
         tempNode = node;
         if (tempNode.LegalMove(sp_x, sp_y, sp_x + 1, sp_y) == true) {
-            neighbors.push_back(tempNode);
+            successors.push_back(tempNode);
         }
-        std::swap(neighbors, neighborNodes);
-        return neighborNodes.size();
+        std::swap(successors, successorNodes);
+        return successorNodes.size();
     }
 };
 

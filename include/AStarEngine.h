@@ -95,8 +95,8 @@ namespace AStarEng
         virtual double CalG(const NodeType &srcNode, const NodeType &dstNode) = 0;
         // Judge that if _nodeA_ is the _goalNode_
         virtual bool IsGoalNode(const NodeType& node, const NodeType& goalNode) = 0;
-        // Get the neighbor nodes of _srcNode_
-        virtual unsigned int GetNeighbors(const NodeType &node, const NodeType * const pParent, vector<NodeType> &neighborNodes) = 0;               
+        // Get the successor of _srcNode_
+        virtual unsigned int GetSuccessors(const NodeType &node, const NodeType * const pParent, vector<NodeType> &successorNodes) = 0;
         // Judge that if _nodeA_ and _nodeB_ is the same node
         virtual bool IsSameNode(const NodeType& nodeA, const NodeType& nodeB)
         {
@@ -404,10 +404,10 @@ namespace AStarEng
             }
             else
             {
-                vector<NodeType> neighborNodes;
-                m_Grid.GetNeighbors(*node, node->pParent, neighborNodes);
-                for(vector<NodeType>::iterator iter = neighborNodes.begin();
-                    iter != neighborNodes.end();
+                vector<NodeType> successorNodes;
+                m_Grid.GetSuccessors(*node, node->pParent, successorNodes);
+                for(vector<NodeType>::iterator iter = successorNodes.begin();
+                    iter != successorNodes.end();
                     ++iter)
                 {
                     double gVal = node->g + m_Grid.CalG(*node, *iter);
