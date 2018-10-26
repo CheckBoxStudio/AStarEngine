@@ -38,11 +38,10 @@
 #include <vector>
 #include <unordered_map>
 
-#define _DEBUG_TEST_
+#define DEBUG_TEST
 
-#define _USE_MEM_POOL_
-
-#ifdef _USE_MEM_POOL_
+#define USE_MEM_POOL
+#ifdef USE_MEM_POOL
 #include "MemPool.h"
 #endif
 
@@ -65,17 +64,18 @@ namespace AStarEng
     class AANode
     {
     public:
-        typedef int IDKey;
+        typedef long long IDKey;
     public:
         AANode() : m_key(-1) {}
         ~AANode() {}
         virtual IDKey Key() const { return m_key; }
-        virtual IDKey ID() const {return m_key; }
-
-        virtual void Print() {
-            printf("%d",m_key);
+        virtual IDKey ID() const { return m_key; }
+        virtual void Print() { printf("%d", m_key); }
+    private:
+        virtual IDKey genKey() {
+            m_key = -1; 
+            return m_key;
         }
-
     protected:
         IDKey m_key; // Unique identifier of the node, invalid node has m_key<0.
     };
@@ -93,25 +93,19 @@ namespace AStarEng
         virtual double CalH(const NodeType &srcNode, const NodeType &goalNode) = 0;
         // Calculate the distance(cost) of travelling from _srcNode_ to _dstNode_
         virtual double CalG(const NodeType &srcNode, const NodeType &dstNode) = 0;
-        // Judge that if _nodeA_ is the _goalNode_
-        virtual bool IsGoalNode(const NodeType& node, const NodeType& goalNode) = 0;
-        // Get the successor of _srcNode_
+        // Judge that if _node_ is the _goalNode_
+        virtual bool IsGoalNode(const NodeType &node, const NodeType &goalNode) = 0;
+        // Get the successor of _node_
         virtual unsigned int GetSuccessors(const NodeType &node, const NodeType * const pParent, vector<NodeType> &successorNodes) = 0;
         // Judge that if _nodeA_ and _nodeB_ is the same node
-        virtual bool IsSameNode(const NodeType& nodeA, const NodeType& nodeB)
-        {
-            return nodeA.Key() == nodeB.Key();
-        }
+        virtual bool IsSameNode(const NodeType &nodeA, const NodeType &nodeB) { return nodeA.Key() == nodeB.Key(); }
         // Calculate the entire cost of one route(solution) _nodes_
-        virtual double CalRouteCost(const vector<NodeType> &nodes)
-        {
-            double costVal = 0.0;
-            if (nodes.size() > 1) {
-                for (int i = 1; i < nodes.size(); ++i) {
-                    costVal += CalG(nodes.at(i - 1), nodes.at(i));
-                }
+        virtual double CalRouteCost(const vector<NodeType> &nodes) {
+            double totalCost = 0.0;
+            for (int i = 1; i < nodes.size(); ++i) {
+                totalCost += CalG(nodes.at(i - 1), nodes.at(i));
             }
-            return costVal;
+            return totalCost;
         };
     };
 
@@ -162,8 +156,12 @@ namespace AStarEng
         ASE_STATE_FAILED,
         ASE_STATE_OUT_OF_MEMORY
     };
+
     template <typename NodeType, typename GridType> class AAEngine
     {
+    public:
+        typedef NodeType node_type;
+        typedef GridType grid_type;
     protected:
         class ASENode : public NodeType
         {
@@ -180,12 +178,12 @@ namespace AStarEng
         public:
             double h; // heuristic estimate of distance(cost) from this node to the goal
             double g; // distance(cost) from the start node to this node
-            double f; // m_f = m_g + m_h
+            double f; // f = g + h
             ASENode *pParent; // used during the search
             ASENode *pChild;  // used after the search
         };
 
-        class HeapCmp {
+        class NodeCmp {
         public:
             bool operator() (const ASENode *nodeA, const ASENode *nodeB) const {
                 return nodeA->f > nodeB->f;
@@ -193,71 +191,43 @@ namespace AStarEng
         };
 
     public:
-#ifdef _USE_MEM_POOL_
-        AAEngine(const unsigned int MemPoolSize)
+#ifdef USE_MEM_POOL
+        AAEngine(const unsigned int MemPoolSize) : m_MemPool(MemPoolSize)
 #else
         AAEngine()
 #endif
-            : m_State(ASE_STATE_INVALID)
-            , m_CancelRequest(false)
-#ifdef _USE_MEM_POOL_
-            , m_MemPool(MemPoolSize)
-#endif
-            , m_StartNode(NULL)
-            , m_GoalNode(NULL)
-            , m_SolutionNode(NULL)
-            , m_AllocateNodeCount(0)
-            , m_Step(0)
         {
+            initialize();
         }
 
-#ifdef _USE_MEM_POOL_
-        AAEngine(const unsigned int MemPoolSize, const NodeType &startNode, const NodeType &goalNode)
+#ifdef USE_MEM_POOL
+        AAEngine(const unsigned int MemPoolSize, const NodeType &startNode, const NodeType &goalNode) : m_MemPool(MemPoolSize)
 #else
         AAEngine(const NodeType &startNode, const NodeType &goalNode)
 #endif
-            : m_State(ASE_STATE_INVALID)
-            , m_CancelRequest(false)
-#ifdef _USE_MEM_POOL_
-            , m_MemPool(MemPoolSize)
-#endif
-            , m_StartNode(NULL)
-            , m_GoalNode(NULL)
-            , m_SolutionNode(NULL)
-            , m_AllocateNodeCount(0)
-            , m_Step(0)
         {
+            initialize();
             SetStartAndGoalNodes(startNode, goalNode);
         }
 
         ~AAEngine()
         {
-            releaseData(true);
-        }
+            ReleaseSolutionData();
+            assert(m_AllocateNodeCount == 0);
+        }        
 
-        void Clear()
-        {
-            releaseData(true);
-        }
-
-        ASE_STATE GetState() const {
-            return m_State;
-        }
-
+        GridType& GetGrid() { return m_Grid; }
+        ASE_STATE GetState() const { return m_State; }
+        unsigned int GetStepCount() const { return m_Step; }
         void SetStartAndGoalNodes(const NodeType &startNode, const NodeType &goalNode)
         {
             assert(m_State != ASE_STATE_SEARCHING);
-            releaseData(true);
+            m_StartNodeOriginIn = startNode;
+            m_GoalNodeOriginIn = goalNode;
 
-            m_StartNode = allocateASENode(&startNode);
-            m_GoalNode = allocateASENode(&goalNode);
-            assert(m_StartNode != NULL && m_GoalNode != NULL);
-
-            m_StartNode->g = 0.0;
-            m_StartNode->h = m_Grid.CalH(*m_StartNode, *m_GoalNode);
-            m_StartNode->f = m_StartNode->g + m_StartNode->h;
-
-            pushOpenList(m_StartNode);
+            freeDumpData();
+            ReleaseSolutionData();
+            m_Step = 0;
 
             m_State = ASE_STATE_INITIALISED;
         }
@@ -265,6 +235,7 @@ namespace AStarEng
         // return the step it has performed
         int Search(const NodeType &startNode, const NodeType &goalNode)
         {
+            assert(m_State != ASE_STATE_SEARCHING);
             SetStartAndGoalNodes(startNode, goalNode);
             return Search();
         }
@@ -272,40 +243,48 @@ namespace AStarEng
         // return the step it has performed
         int Search()
         {
-            m_Step = 0;
-            do {
-                searchOneStep();
-                m_Step++;
-            } while(m_State == ASE_STATE_SEARCHING);
-            return (m_State == ASE_STATE_SUCCEEDED) ? m_Step : -(int)m_Step;
+            if (m_State == ASE_STATE_INITIALISED || m_State == ASE_STATE_CANCELED)
+            {
+                if (m_State == ASE_STATE_INITIALISED) {
+                    // both open and close list should be empty, and step should be 0.
+                    m_StartNode = allocateASENode(&m_StartNodeOriginIn);
+                    m_GoalNode = allocateASENode(&m_GoalNodeOriginIn);
+                    assert(m_StartNode != NULL && m_GoalNode != NULL);
+                    m_StartNode->g = 0.0;
+                    m_StartNode->h = m_Grid.CalH(m_StartNodeOriginIn, m_GoalNodeOriginIn);
+                    m_StartNode->f = m_StartNode->g + m_StartNode->h;
+                    pushOpenList(m_StartNode);                    
+                }
+
+                do {
+                    searchOneStep();
+                    m_Step++;
+                } while (m_State == ASE_STATE_SEARCHING);               
+            }
+            return (m_State == ASE_STATE_SUCCEEDED) ? m_Step : -(int)m_Step;   
         }
 
         void CancelSearch()
         {
-            if(m_State == ASE_STATE_SEARCHING)
-            {
+            if(m_State == ASE_STATE_SEARCHING) {
                 m_CancelRequest = true;
             }
         }
 
-        // Get result
-        unsigned int GetStepCount() const
-        {
-            return m_Step;
-        }
+        // Get result       
         double GetSolutionCost()
         {
             assert(m_State == ASE_STATE_SUCCEEDED);
             return m_GoalNode->f;
         }
 
-        vector<NodeType*> GetSolution()
+        vector<NodeType> GetSolution()
         {
             assert(m_State == ASE_STATE_SUCCEEDED);
-            vector<NodeType*> solutionNodes;
+            vector<NodeType> solutionNodes;
             ASENode *node = m_StartNode;
             while(node) {
-                solutionNodes.push_back(node);
+                solutionNodes.push_back(*node);
                 node = node->pChild;
             }
             return solutionNodes;
@@ -352,7 +331,33 @@ namespace AStarEng
             return m_SolutionNode;
         }
 
+        void ReleaseSolutionData()
+        {
+            assert(m_State != ASE_STATE_SEARCHING);
+            ASENode *pNode = m_StartNode;
+            while (pNode) {
+                ASENode *pNodeToFree = pNode;
+                pNode = pNode->pChild;
+                freeASENode(pNodeToFree);
+            }
+            m_StartNode = NULL;
+            m_GoalNode = NULL;
+            m_SolutionNode = NULL;
+            m_Step = 0;
+            m_State = ASE_STATE_INVALID;
+        }
     private:
+        void initialize()
+        {           
+            m_StartNode = NULL;
+            m_GoalNode = NULL;
+            m_SolutionNode = NULL;
+            m_AllocateNodeCount = 0;
+            m_Step = 0;
+            m_CancelRequest = false;
+            m_State = ASE_STATE_INVALID;         
+        }
+
         ASE_STATE searchOneStep()
         {
             /// A. check state
@@ -379,7 +384,7 @@ namespace AStarEng
             /// C. main stuff
             ASENode *node = popOpenList();
             if (node == NULL) {
-                releaseData(false);
+                freeDumpData();
                 m_State = ASE_STATE_FAILED;
                 return m_State;
             }
@@ -398,9 +403,8 @@ namespace AStarEng
                     nodeChild = nodeParent;
                     nodeParent = nodeParent->pParent;
                 }
-                releaseData(false);
-                m_State = ASE_STATE_SUCCEEDED;
-                return m_State;
+                freeDumpData();
+                m_State = ASE_STATE_SUCCEEDED;            
             }
             else
             {
@@ -412,21 +416,19 @@ namespace AStarEng
                 {
                     double gVal = node->g + m_Grid.CalG(*node, *iter);
                     if (m_OpenSet.find(iter->Key()) != m_OpenSet.end())
-                    {
+                    { // already in open list
                         ASENode *nbNode = m_OpenSet[iter->Key()];
-                        if (nbNode->g > gVal)
-                        {
+                        if (nbNode->g > gVal) {
                             nbNode->g = gVal;
                             nbNode->f = nbNode->g + nbNode->h;
                             nbNode->pParent = node;
-                            make_heap( m_OpenList.begin(), m_OpenList.end(), HeapCmp() );
+                            make_heap( m_OpenList.begin(), m_OpenList.end(), NodeCmp() );
                         }
                     }
                     else if (m_ClosedSet.find(iter->Key()) != m_ClosedSet.end())
-                    {
+                    { // already in close list [This should never happen for an consistent admissible heuristic]
                         ASENode *nbNode = m_ClosedSet[iter->Key()];
-                        if (nbNode->g > gVal)
-                        {
+                        if (nbNode->g > gVal) {
                             nbNode->g = gVal;
                             nbNode->f = nbNode->g + nbNode->h;
                             nbNode->pParent = node;
@@ -435,10 +437,10 @@ namespace AStarEng
                         }
                     }
                     else
-                    {
+                    { // a new node
                         ASENode *nbNode = allocateASENode(&(*iter));
                         if (nbNode == NULL) {
-                            releaseData(false);
+                            freeDumpData();
                             m_State = ASE_STATE_OUT_OF_MEMORY;
                             return m_State;
                         }
@@ -449,14 +451,14 @@ namespace AStarEng
                         pushOpenList(nbNode);
                     }
                 }
-                return m_State;
             }
+            return m_State;
         }
 
         ASENode* allocateASENode(const NodeType *node)
         {
             ASENode *pNewNode = NULL;
-#ifdef _USE_MEM_POOL_
+#ifdef USE_MEM_POOL
             ASENode *address = m_MemPool.Alloc();
             if (address) {
                 pNewNode = node ? new (address) ASENode(*node) : new (address) ASENode;
@@ -473,7 +475,7 @@ namespace AStarEng
         {
             if (node)
             {
-#ifdef _USE_MEM_POOL_
+#ifdef USE_MEM_POOL
                 node->~ASENode();
                 m_MemPool.Free(node);
 #else
@@ -485,11 +487,10 @@ namespace AStarEng
 
         void pushOpenList(ASENode *node)
         {
-            if (node)
-            {
+            if (node) {
                 assert(m_OpenSet.find(node->Key()) == m_OpenSet.end());
                 m_OpenList.push_back(node);
-                push_heap(m_OpenList.begin(), m_OpenList.end(), HeapCmp() );
+                push_heap(m_OpenList.begin(), m_OpenList.end(), NodeCmp() );
                 m_OpenSet[node->Key()] = node;
             }
         }
@@ -499,78 +500,53 @@ namespace AStarEng
             ASENode *node = NULL;
             if (!m_OpenList.empty()) {
                 node = m_OpenList.front();
-                pop_heap(m_OpenList.begin(), m_OpenList.end(), HeapCmp());
+                pop_heap(m_OpenList.begin(), m_OpenList.end(), NodeCmp());
                 m_OpenList.pop_back();
                 m_OpenSet.erase(node->Key());
             }
             return node;
         }
 
-        unsigned int releaseData(bool bToReleaseSolutionData)
+        void freeDumpData()
         {
-            unsigned int cnt = 0;
             unordered_map<AANode::IDKey, ASENode*>::iterator iter;
 
-            iter = m_OpenSet.begin();
-            while(iter != m_OpenSet.end())
-            {
+            for (iter = m_OpenSet.begin(); iter != m_OpenSet.end(); ++iter) {
                 if (!iter->second->pChild) {
                     freeASENode(iter->second);
-                    cnt++;
                 }
-                iter++;
             }
             m_OpenSet.clear();
             m_OpenList.clear();
 
-            iter = m_ClosedSet.begin();
-            while(iter != m_ClosedSet.end())
-            {
+            for (iter = m_ClosedSet.begin(); iter != m_ClosedSet.end(); ++iter) {
                 if (!iter->second->pChild) {
                     freeASENode(iter->second);
-                    cnt++;
                 }
-                iter++;
             }
             m_ClosedSet.clear();
-
-            if (bToReleaseSolutionData)
-            {
-                ASENode *pNode = m_StartNode;
-                while (pNode)
-                {
-                    ASENode *pNodeToFree = pNode;
-                    pNode = pNode->pChild;
-                    freeASENode(pNodeToFree);
-                    cnt++;
-                }
-                m_StartNode = NULL;
-                m_GoalNode = NULL;
-                m_SolutionNode = NULL;
-                m_State = ASE_STATE_INVALID;
-                m_Step = 0;
-            }
-            return cnt;
         }
 
     private:
-        ASENode *m_StartNode;
-        ASENode *m_GoalNode;
+        NodeType m_StartNodeOriginIn;
+        NodeType m_GoalNodeOriginIn;
+        GridType m_Grid;
 
         int m_AllocateNodeCount;
+        ASENode *m_StartNode;
+        ASENode *m_GoalNode;
+        ASENode *m_SolutionNode;        
         unordered_map<AANode::IDKey, ASENode*> m_OpenSet;
         unordered_map<AANode::IDKey, ASENode*> m_ClosedSet;
         vector<ASENode*> m_OpenList;
 
         ASE_STATE m_State;
         bool m_CancelRequest;
-        unsigned int m_Step;
-        ASENode *m_SolutionNode;
+        unsigned int m_Step;        
 
-#ifdef _USE_MEM_POOL_
+#ifdef USE_MEM_POOL
         MemPool<ASENode> m_MemPool;
-#endif
-        GridType m_Grid;
+#endif       
     };
 
 }

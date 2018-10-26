@@ -9,6 +9,7 @@
 
 using namespace AStarEng;
 
+
 const int MAX_CITIES = 20;
 
 enum ENUM_CITIES { 
@@ -116,13 +117,11 @@ inline void initCities()
 class CityNode : public AANode
 {
 public:
-    CityNode()
-        : m_city(Arad)
+    CityNode() : m_city(Arad)
     {
         genKey();
     }
-    CityNode(const ENUM_CITIES city)
-        : m_city(city)
+    CityNode(const ENUM_CITIES city) : m_city(city)
     {
         genKey();
     }
@@ -138,9 +137,10 @@ public:
     }
 
 private:
-    void genKey()
+    IDKey genKey()
     {
         m_key = m_city;
+        return m_key;
     }
 private:
     ENUM_CITIES m_city;
@@ -185,12 +185,12 @@ public:
     {
         return RomaniaMap[srcNode.City()][dstNode.City()];
     }
-    // Judge that if _nodeA_ is the _goalNode_
-    bool IsGoalNode(const CityNode& node, const CityNode& goalNode)
+    // Judge that if _node_ is the _goalNode_
+    bool IsGoalNode(const CityNode &node, const CityNode &goalNode)
     {
         return node.City() == Bucharest;
     }
-    // Get the successor nodes of _srcNode_
+    // Get the successor nodes of _node_
     unsigned int GetSuccessors(const CityNode &node, const CityNode * const pParent, vector<CityNode> &successorNodes)
     {
         vector<CityNode> successors;
@@ -235,9 +235,9 @@ inline void doRomaniaTest()
         CityNode *node = astarsearch.GetSolutionStart();
         while (node) {
             node->Print();
-            node = astarsearch.GetSolutionNext();
             printf("\n");
             steps++;
+            node = astarsearch.GetSolutionNext();
         }
         printf("Solution steps %d\n", steps);
 
@@ -247,14 +247,12 @@ inline void doRomaniaTest()
         steps = 0;
         node = astarsearch.GetSolutionEnd();
         while (node) {
-            node->Print();
-            node = astarsearch.GetSolutionPrev();
+            node->Print();           
             printf("\n");
             steps++;
+            node = astarsearch.GetSolutionPrev();
         }
         printf("Solution steps %d\n", steps);
-
-        node = astarsearch.GetSolutionEnd();
     }
     else if (astarsearch.GetState() == ASE_STATE_FAILED)
     {

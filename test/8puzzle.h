@@ -93,7 +93,7 @@ public:
         return false;
     }
 private:
-    void genKey()
+    IDKey genKey()
     {
         int key = 0;
         for (int i = 0; i < BOARD_WIDTH*BOARD_HEIGHT; ++i)
@@ -102,6 +102,7 @@ private:
             key += (m_tile[i] & 0xF);
         }
         m_key = key;
+        return m_key;
     }
 private:
     TILE m_tile[BOARD_WIDTH*BOARD_HEIGHT];
@@ -216,8 +217,6 @@ public:
             {
                 s += 2;
             }
-
-
         }
 
         // mult by 3 and add to h
@@ -230,12 +229,12 @@ public:
     {
         return 1.0;
     }
-    // Judge that if _nodeA_ is the _goalNode_
-    bool IsGoalNode(const PuzzleNode& node, const PuzzleNode& goalNode)
+    // Judge that if _node_ is the _goalNode_
+    bool IsGoalNode(const PuzzleNode &node, const PuzzleNode &goalNode)
     {
         return IsSameNode(node, goalNode);
     }
-    // Get the successor nodes of _srcNode_
+    // Get the successor nodes of _node_
     unsigned int GetSuccessors(const PuzzleNode &node, const PuzzleNode * const pParent, vector<PuzzleNode> &successorNodes)
     {
         vector<PuzzleNode> successors;
@@ -332,10 +331,10 @@ inline void doPuzzleTest()
         steps = 0;
         PuzzleNode *node = astarsearch.GetSolutionStart();
         while (node) {
-            node->Print();
-            node = astarsearch.GetSolutionNext();
+            node->Print();           
             printf("\n");
             steps++;
+            node = astarsearch.GetSolutionNext();
         }
         printf("Solution steps %d\n", steps);
 
@@ -345,14 +344,12 @@ inline void doPuzzleTest()
         steps = 0;
         node = astarsearch.GetSolutionEnd();
         while (node) {
-            node->Print();
-            node = astarsearch.GetSolutionPrev();
+            node->Print();           
             printf("\n");
             steps++;
+            node = astarsearch.GetSolutionPrev();
         }
         printf("Solution steps %d\n", steps);
-
-        node = astarsearch.GetSolutionEnd();
     }
     else if (astarsearch.GetState() == ASE_STATE_FAILED)
     {
@@ -364,7 +361,6 @@ inline void doPuzzleTest()
     }
     printf("\n-----\n\n");
     printf("Total search steps : %d \n", astarsearch.GetStepCount());
-
 }
 
 #endif //!PROBLEM_EIGHTPUZZLE_H
