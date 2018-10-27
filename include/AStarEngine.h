@@ -416,6 +416,7 @@ namespace AStarEng
                     { // already in open list
                         ASENode *nbNode = m_OpenSet[iter->Key()];
                         if (nbNode->g > gVal) {
+                            *nbNode = *iter;
                             nbNode->g = gVal;
                             nbNode->f = nbNode->g + nbNode->h;
                             nbNode->pParent = node;
@@ -426,6 +427,7 @@ namespace AStarEng
                     { // already in close list [This should never happen for an consistent admissible heuristic]
                         ASENode *nbNode = m_ClosedSet[iter->Key()];
                         if (nbNode->g > gVal) {
+                            *nbNode = *iter;
                             nbNode->g = gVal;
                             nbNode->f = nbNode->g + nbNode->h;
                             nbNode->pParent = node;
