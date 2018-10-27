@@ -72,10 +72,7 @@ namespace AStarEng
         virtual IDKey ID() const { return m_key; }
         virtual void Print() { printf("%d", m_key); }
     private:
-        virtual IDKey genKey() {
-            m_key = -1; 
-            return m_key;
-        }
+        virtual IDKey genKey() = 0;
     protected:
         IDKey m_key; // Unique identifier of the node, invalid node has m_key<0.
     };
